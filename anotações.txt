@@ -1,0 +1,114 @@
+--TABLES--
+
+CREATE TABLE aeronaves (
+id SERIAL PRIMARY KEY,
+modelo VARCHAR(50) NOT NULL,
+codigo_cauda VARCHAR(10) UNIQUE NOT NULL,
+capacidade INT NOT NULL CHECK(capacidade >0)
+);
+
+
+CREATE TABLE pilotos (
+id SERIAl PRIMARY KEY,
+nome VARCHAR(150) NOT NULL,
+codigo_anac VARCHAR(6) UNIQUE NOT NULL,
+horas_voo INT DEFAULT 0 CHECK (horas_voo >= 0)
+);
+
+
+CREATE TABLE voos (
+id SERIAL PRIMARY KEY,
+aeronaves_id INT NOT NULL,
+pilotos_id INT NOT NULL,
+numero_voo VARCHAR(20) NOT NULL,
+origem VARCHAR(50) NOT NULL,
+destino VARCHAR(50) NOT NULL,
+data_hora TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+status VARCHAR(150) DEFAULT ('AGENDADO'),
+
+CONSTRAINT fk_voos_aeronaves
+FOREIGN KEY (aeronaves_id)
+REFERENCES aeronaves(id),
+
+
+CONSTRAINT fk_voos_pilotos
+FOREIGN KEY (pilotos_id)
+REFERENCES pilotos(id),
+
+
+CONSTRAINT check_status 
+CHECK (status IN ('Agendado', 'Em Voo', 'Concluido', 'Cancelado'))
+);
+
+
+CREATE TABLE passageiros (
+id SERIAL PRIMARY KEY, 
+nome VARCHAR(100) NOT NULL, 
+cpf VARCHAR(11) UNIQUE NOT NULL,
+email VARCHAR(100) UNIQUE NOT NULL
+)
+
+
+CREATE TABLE passagens (
+id SERIAL PRIMARY KEY,
+voos_id INT NOT NULL,
+passageiros_id INT NOT NULL,
+assento VARCHAR(4) NOT NULL, 
+classe VARCHAR(50) DEFAULT ('Economica'),
+valor DECIMAL(10,2) NOT NULL CHECK (valor > 0),
+
+CONSTRAINT fk_passagens_voos
+FOREIGN KEY (voos_id)
+REFERENCES voos(id),
+
+
+CONSTRAINT fk_passagens_passageiros
+FOREIGN KEY (passageiros_id)
+REFERENCES passageiros(id),
+
+
+CONSTRAINT check_classe
+CHECK (classe IN ('Economica', 'Executiva'))
+)
+
+
+--INSERT--
+
+INSERT INTO aeronaves (modelo, codigo_cauda, capacidade) VALUES
+('Av1', '123-ABC', '100'),
+('Av2', '456-ABC', '160'),
+('Av3', '789-ABC', '210'),
+('Av4', '012-ABC', '255'),
+('Av5', '345-ABC', '310')
+
+
+INSERT INTO pilotos (nome, codigo_anac, horas_voo) VALUES
+('João', '123A', '15'),
+('Pedro', '456B', '02'),
+('Rodolfo', '789C', '21'),
+('Rodrigo', '012A', '22'),
+('Felipe', '345B', '13')
+
+
+INSERT INTO passageiros (nome, cpf, email) VALUES
+('Rafael', '12345678910', 'rafael@email.com'),
+('Sabrina', '10987654321', 'sabrina@gmail.com'),
+('Valentina', '12309845677', 'valentina.gmail.com'),
+('Rodrigo', '09812312300', 'rodrigo@gmail.com'),
+('Caio', '14285629004', 'caio@gmail.com')
+
+
+INSERT INTO voos (aeronaves_id, pilotos_id, numero_voo, origem, destino, data_hora, status) VALUES
+('1', '1', 'SA301', 'São Paulo', 'Belo Horizonte', '02-10-2026 14:00:00', 'Cancelado'),
+('2', '2', 'SA302', 'Rio de Janeiro', 'São Paulo', '02-10-2026 19:00:00', 'Concluido'),
+('3', '3', 'SA303', 'Florianópolis', 'Tocantins', '02-10-2026 16:00:00', 'Em Voo'),
+('4', '4', 'SA304', 'Porto Alegre', 'São Paulo', '02-10-2026 04:00:00', 'Agendado'),
+('5', '5', 'SA305', 'Recife', 'Espírito Santos', '02-10-2026 07:00:00', 'Agendado')
+
+
+INSERT INTO passagens (voos_id, passageiros_id, assento, classe, valor) VALUES
+('1', '1', '24', 'Executiva', '890.00'),
+('2', '2', '28', 'Executiva', '1290.00'),
+('3', '3', '35', 'Economica', '680.00'),
+('4', '4', '12', 'Economica', '615.00'),
+('5', '5', '19', 'Executiva', '975.00')
